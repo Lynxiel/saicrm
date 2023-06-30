@@ -15,8 +15,15 @@ use App\Models\Shop\Order;
 use App\Models\Shop\OrderItem;
 use App\Models\Shop\Payment;
 use App\Models\Shop\Product;
+use App\Models\Student\Category;
+use App\Models\Student\Course;
+use App\Models\Student\CourseStudent;
+use App\Models\Student\Student;
 use App\Models\User;
 use Closure;
+use Database\Factories\Student\CategoryFactory;
+use Database\Factories\Student\CourseStudentsFactory;
+use Database\Factories\Student\StudentFactory;
 use Filament\Notifications\Actions\Action;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Collection;
@@ -42,81 +49,108 @@ class DatabaseSeeder extends Seeder
         $this->command->info('Admin user created.');
 
         // Shop
-        $this->command->warn(PHP_EOL . 'Creating shop brands...');
-        $brands = $this->withProgressBar(20, fn () => Brand::factory()->count(20)
-            ->has(Address::factory()->count(rand(1, 3)))
+//        $this->command->warn(PHP_EOL . 'Creating shop brands...');
+//        $brands = $this->withProgressBar(20, fn () => Brand::factory()->count(20)
+//            ->has(Address::factory()->count(rand(1, 3)))
+//            ->create());
+//        $this->command->info('Shop brands created.');
+//
+//        $this->command->warn(PHP_EOL . 'Creating shop categories...');
+//        $categories = $this->withProgressBar(20, fn () => ShopCategory::factory(1)
+//            ->has(
+//                ShopCategory::factory()->count(3),
+//                'children'
+//            )->create());
+//        $this->command->info('Shop categories created.');
+//
+//        $this->command->warn(PHP_EOL . 'Creating shop customers...');
+//        $customers = $this->withProgressBar(100, fn () => Customer::factory(1)
+//            ->has(Address::factory()->count(rand(1, 3)))
+//            ->create());
+//        $this->command->info('Shop customers created.');
+//
+//        $this->command->warn(PHP_EOL . 'Creating shop products...');
+//        $products = $this->withProgressBar(10, fn () => Product::factory(1)
+//            ->sequence(fn ($sequence) => ['shop_brand_id' => $brands->random(1)->first()->id])
+//            ->hasAttached($categories->random(rand(3, 6)), ['created_at' => now(), 'updated_at' => now()])
+//            ->has(
+//                Comment::factory()->count(rand(10, 20))
+//                    ->state(fn (array $attributes, Product $product) => ['customer_id' => $customers->random(1)->first()->id]),
+//            )
+//            ->create());
+//        $this->command->info('Shop products created.');
+//
+//        $this->command->warn(PHP_EOL . 'Creating orders...');
+//        $orders = $this->withProgressBar(100, fn () => Order::factory(1)
+//            ->sequence(fn ($sequence) => ['shop_customer_id' => $customers->random(1)->first()->id])
+//            ->has(Payment::factory()->count(rand(1, 3)))
+//            ->has(
+//                OrderItem::factory()->count(rand(2, 5))
+//                    ->state(fn (array $attributes, Order $order) => ['shop_product_id' => $products->random(1)->first()->id]),
+//                'items'
+//            )
+//            ->create());
+//
+//        foreach ($orders->random(rand(5, 8)) as $order) {
+//            Notification::make()
+//                ->title('New order')
+//                ->icon('heroicon-o-shopping-bag')
+//                ->body("**{$order->customer->name} ordered {$order->items->count()} products.**")
+//                ->actions([
+//                    Action::make('View')
+//                        ->url(OrderResource::getUrl('edit', ['record' => $order])),
+//                ])
+//                ->sendToDatabase($user);
+//        }
+//        $this->command->info('Shop orders created.');
+//
+//        // Blog
+//        $this->command->warn(PHP_EOL . 'Creating blog categories...');
+//        $blogCategories = $this->withProgressBar(20, fn () => BlogCategory::factory(1)
+//            ->count(20)
+//            ->create());
+//        $this->command->info('Blog categories created.');
+//
+//        $this->command->warn(PHP_EOL . 'Creating blog authors and posts...');
+//        $this->withProgressBar(20, fn () => Author::factory(1)
+//            ->has(
+//                Post::factory()->count(5)
+//                    ->has(
+//                        Comment::factory()->count(rand(5, 10))
+//                            ->state(fn (array $attributes, Post $post) => ['customer_id' => $customers->random(1)->first()->id]),
+//                    )
+//                    ->state(fn (array $attributes, Author $author) => ['blog_category_id' => $blogCategories->random(1)->first()->id]),
+//                'posts'
+//            )
+//            ->create());
+//        $this->command->info('Blog authors and posts created.');
+
+
+        // Student
+        // Courses categories
+        $this->command->warn(PHP_EOL . 'Creating courses categories...');
+        $CourseCategories = $this->withProgressBar(10, fn () => Category::factory(1)->create());
+        $this->command->info('Courses categories created.');
+
+        // Courses
+        $this->command->warn(PHP_EOL . 'Creating courses...');
+        $courses = $this->withProgressBar(10, fn () => Course::factory(1)
+            //->hasAttached($CourseCategories->random(rand(1, 8)), ['created_at' => now(), 'updated_at' => now()])
             ->create());
-        $this->command->info('Shop brands created.');
+        $this->command->info('Courses created.');
 
-        $this->command->warn(PHP_EOL . 'Creating shop categories...');
-        $categories = $this->withProgressBar(20, fn () => ShopCategory::factory(1)
-            ->has(
-                ShopCategory::factory()->count(3),
-                'children'
-            )->create());
-        $this->command->info('Shop categories created.');
-
-        $this->command->warn(PHP_EOL . 'Creating shop customers...');
-        $customers = $this->withProgressBar(1000, fn () => Customer::factory(1)
-            ->has(Address::factory()->count(rand(1, 3)))
+        // Students
+        $this->command->warn(PHP_EOL . 'Creating students...');
+        $students = $this->withProgressBar(10, fn () => Student::factory(1)
             ->create());
-        $this->command->info('Shop customers created.');
+        $this->command->info('Students created.');
 
-        $this->command->warn(PHP_EOL . 'Creating shop products...');
-        $products = $this->withProgressBar(50, fn () => Product::factory(1)
-            ->sequence(fn ($sequence) => ['shop_brand_id' => $brands->random(1)->first()->id])
-            ->hasAttached($categories->random(rand(3, 6)), ['created_at' => now(), 'updated_at' => now()])
-            ->has(
-                Comment::factory()->count(rand(10, 20))
-                    ->state(fn (array $attributes, Product $product) => ['customer_id' => $customers->random(1)->first()->id]),
-            )
+        // Assign student to courses
+        $this->command->warn(PHP_EOL . 'Assign students to courses...');
+        $assignments = $this->withProgressBar(20, fn () => CourseStudent::factory(1)
+           // ->hasAttached($CourseCategories->random(rand(1, 8)),  $students->random(rand(1, 8))     )
             ->create());
-        $this->command->info('Shop products created.');
-
-        $this->command->warn(PHP_EOL . 'Creating orders...');
-        $orders = $this->withProgressBar(1000, fn () => Order::factory(1)
-            ->sequence(fn ($sequence) => ['shop_customer_id' => $customers->random(1)->first()->id])
-            ->has(Payment::factory()->count(rand(1, 3)))
-            ->has(
-                OrderItem::factory()->count(rand(2, 5))
-                    ->state(fn (array $attributes, Order $order) => ['shop_product_id' => $products->random(1)->first()->id]),
-                'items'
-            )
-            ->create());
-
-        foreach ($orders->random(rand(5, 8)) as $order) {
-            Notification::make()
-                ->title('New order')
-                ->icon('heroicon-o-shopping-bag')
-                ->body("**{$order->customer->name} ordered {$order->items->count()} products.**")
-                ->actions([
-                    Action::make('View')
-                        ->url(OrderResource::getUrl('edit', ['record' => $order])),
-                ])
-                ->sendToDatabase($user);
-        }
-        $this->command->info('Shop orders created.');
-
-        // Blog
-        $this->command->warn(PHP_EOL . 'Creating blog categories...');
-        $blogCategories = $this->withProgressBar(20, fn () => BlogCategory::factory(1)
-            ->count(20)
-            ->create());
-        $this->command->info('Blog categories created.');
-
-        $this->command->warn(PHP_EOL . 'Creating blog authors and posts...');
-        $this->withProgressBar(20, fn () => Author::factory(1)
-            ->has(
-                Post::factory()->count(5)
-                    ->has(
-                        Comment::factory()->count(rand(5, 10))
-                            ->state(fn (array $attributes, Post $post) => ['customer_id' => $customers->random(1)->first()->id]),
-                    )
-                    ->state(fn (array $attributes, Author $author) => ['blog_category_id' => $blogCategories->random(1)->first()->id]),
-                'posts'
-            )
-            ->create());
-        $this->command->info('Blog authors and posts created.');
+        $this->command->info('Assignments created.');
     }
 
     protected function withProgressBar(int $amount, Closure $createCollectionOfOne): Collection

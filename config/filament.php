@@ -13,6 +13,7 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use App\Http\Middleware\TeamsPermissionMiddleware;
 
 return [
 
@@ -49,11 +50,10 @@ return [
     | into the admin panel.
     |
     */
-
     'auth' => [
         'guard' => env('FILAMENT_AUTH_GUARD', 'web'),
         'pages' => [
-            'login' => \App\Filament\Pages\Auth\Login::class,
+            'login' => \JeffGreco13\FilamentBreezy\Http\Livewire\Auth\Login::class,
         ],
     ],
 
@@ -221,6 +221,7 @@ return [
     'middleware' => [
         'auth' => [
             Authenticate::class,
+            TeamsPermissionMiddleware::class,
         ],
         'base' => [
             EncryptCookies::class,

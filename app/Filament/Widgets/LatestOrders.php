@@ -3,17 +3,22 @@
 namespace App\Filament\Widgets;
 
 use App\Filament\Resources\Shop\OrderResource;
-use App\Models\Shop\Order;
+use App\Filament\Resources\Student\CourseResource;
+use App\Models\Student\Course;
 use Filament\Tables;
 use Filament\Widgets\TableWidget as BaseWidget;
 use Illuminate\Database\Eloquent\Builder;
 use Squire\Models\Currency;
+use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 
 class LatestOrders extends BaseWidget
 {
+    use HasWidgetShield;
+
     protected int | string | array $columnSpan = 'full';
 
     protected static ?int $sort = 2;
+    protected static ?string $heading = 'Latest courses';
 
     public function getDefaultTableRecordsPerPageSelectOption(): int
     {
@@ -32,47 +37,43 @@ class LatestOrders extends BaseWidget
 
     protected function getTableQuery(): Builder
     {
-        return OrderResource::getEloquentQuery();
+       return CourseResource::getEloquentQuery()->withCount('students');
     }
 
     protected function getTableColumns(): array
     {
         return [
+            Tables\Columns\TextColumn::make('name')
+                ->label('Название')
+                ->searchable()
+                ->sortable(),
+
+            Tables\Columns\TextColumn::make('category.name')
+                ->label('Категория')
+                ->searchable()
+                ->sortable(),
             Tables\Columns\TextColumn::make('created_at')
-                ->label('Order Date')
-                ->date()
-                ->sortable(),
-            Tables\Columns\TextColumn::make('number')
+                ->label('Создано')
                 ->searchable()
-                ->sortable(),
-            Tables\Columns\TextColumn::make('customer.name')
+                ->sortable()
+                ->dateTime(),
+            Tables\Columns\TextColumn::make('updated_at')
+                ->label('Изменено')
                 ->searchable()
-                ->sortable(),
-            Tables\Columns\BadgeColumn::make('status')
-                ->colors([
-                    'danger' => 'cancelled',
-                    'warning' => 'processing',
-                    'success' => fn ($state) => in_array($state, ['delivered', 'shipped']),
-                ]),
-            Tables\Columns\TextColumn::make('currency')
-                ->getStateUsing(fn ($record): ?string => Currency::find($record->currency)?->name ?? null)
-                ->searchable()
-                ->sortable(),
-            Tables\Columns\TextColumn::make('total_price')
-                ->searchable()
-                ->sortable(),
-            Tables\Columns\TextColumn::make('shipping_price')
-                ->label('Shipping cost')
-                ->searchable()
-                ->sortable(),
+                ->sortable()
+                ->dateTime(),
+
+            Tables\Columns\TextColumn::make('students_count')
+                ->label('Число обучающихся')
+                ->sortable()
         ];
     }
 
     protected function getTableActions(): array
     {
         return [
-            Tables\Actions\Action::make('open')
-                ->url(fn (Order $record): string => OrderResource::getUrl('edit', ['record' => $record])),
+            Tables\Actions\Action::make('Edit')
+                ->url(fn (Course $record): string => CourseResource::getUrl('edit', ['record' => $record])),
         ];
     }
 }
